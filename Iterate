@@ -1,0 +1,25 @@
+#!/bin/bash
+
+# Variables
+HASH_FILE="hashes.txt"
+WORDLIST_FOLDER="wordlists"
+WORDLIST_PREFIX="wordlist_"
+HASH_TYPE=0 # Set the hash type according to your needs (e.g., 0 for MD5)
+
+# Iterate through the wordlist files and run hashcat
+COUNTER=1
+while [ -e "${WORDLIST_FOLDER}/${WORDLIST_PREFIX}${COUNTER}" ]; do
+    echo "Running hashcat with wordlist ${WORDLIST_FOLDER}/${WORDLIST_PREFIX}${COUNTER}..."
+    hashcat -a 0 -m "${HASH_TYPE}" --potfile-disable --status --status-timer=5 "${HASH_FILE}" "${WORDLIST_FOLDER}/${WORDLIST_PREFIX}${COUNTER}"
+    
+    # Check if hashcat found all hashes
+    if [ $? -eq 0 ]; then
+        echo "All hashes cracked. Exiting."
+        exit 0
+    fi
+    
+    # Increment the counter to move to the next wordlist
+    COUNTER=$((COUNTER + 1))
+done
+
+echo "Finished processing all wordlists."
